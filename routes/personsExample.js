@@ -1,0 +1,21 @@
+const schema = {
+  _id: '5c5dd07acec08a7e60a2b7c0',
+  isActive: false,
+  balance: '$1,908.60',
+  picture: 'http://placehold.it/32x32',
+  age: 34,
+  eyeColor: 'green',
+  name: { first: 'Madeleine', last: 'Travis' },
+  company: 'ZAGGLE',
+  email: 'madeleine.travis@zaggle.us',
+  phone: '+1 (851) 590-2147',
+  address: '414 Perry Terrace, Craig, North Dakota, 183',
+  about: 'Incididunt sint nulla cillum excepteur voluptate ut aute excepteur nostrud non eu anim aliqua. Proident est nulla enim qui velit ullamco et enim nulla nisi pariatur magna amet proident. Deserunt anim ea enim officia eiusmod do.',
+  registered: 'Thursday, June 11, 2015 12:22 PM',
+  latitude: '-31.452393',
+  longitude: '52.110915',
+  tags: [ 'enim', 'amet', 'reprehenderit', 'incididunt', 'occaecat' ],
+  friends: [ { name: 'Antonia Collier' }, { name: 'Monica Brock' } ],
+  greeting: 'Hello, Madeleine! You have 6 unread messages.',
+  favoriteFruit: 'apple'
+}

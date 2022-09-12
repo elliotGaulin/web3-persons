@@ -1,0 +1,37 @@
+db.persons.aggregate([
+    { 
+        $addFields: {
+           year: { $regexFind: { input: "$registered", regex: /[0-9]{4}/ }  }
+        } 
+    },
+    {
+        $set: {
+            year: {$toInt : "$year.match"}
+        }
+    },
+    {
+        $match: { 
+            $and: [ 
+                { year: {$gte : 2015 } },
+                { year: {$lte : 2022 } },
+            ] 
+        }
+    },
+    {
+        $addFields: {
+          "balanceDouble": {$toDouble: {$replaceAll: {input: {$replaceAll: {input: "$balance", find: ",", replacement: ""}}, find: {$literal: "$"}, replacement: ""}}},
+        },
+    }, 
+    {
+        $group : {
+            _id: "average",
+            averageBalance : {$avg: "$balanceDouble"}
+        }
+    }, 
+    {
+        $project : {
+            _id: 0,
+            averageBalance: 1,
+        }
+    }
+]);
