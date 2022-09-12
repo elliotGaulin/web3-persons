@@ -2,7 +2,7 @@ const mongo = require("mongodb");
 const MongoClient = mongo.MongoClient;
 const config = require("../config");
 
-const { body, validationResult } = require('express-validator');
+const { body, param, matchedData, validationResult } = require('express-validator');
 
 const statsRouter = require("./stats");
 
@@ -28,25 +28,27 @@ router.get('/', async (req, res, next) => {
 
 });
 
-router.get('/:id', async (req, res, next) => {
-  const client = new MongoClient(config.mongo.uri);
+router.get('/:id',
+  param('id').isString().isLength({ min: 24, max: 24 }),  
+  async (req, res, next) => {
+    const client = new MongoClient(config.mongo.uri);
 
-  try {
-    await client.connect();
-    const db = client.db(config.mongo.dbName);
-    const personsCollection = db.collection(config.mongo.collection.persons);
+    try {
+      await client.connect();
+      const db = client.db(config.mongo.dbName);
+      const personsCollection = db.collection(config.mongo.collection.persons);
 
-    let person = await personsCollection.findOne({ _id: mongo.ObjectId(req.params.id) });
-    res.json({ person: person });
+      let person = await personsCollection.findOne({ _id: mongo.ObjectId(req.params.id) });
+      res.json({ person: person });
 
+    }
+    catch (error) {
+      console.log(error);
+      await client.close();
+      res.status(500).json({ error: error.message });
+    }
   }
-  catch (error) {
-    console.log(error);
-    await client.close();
-    res.status(500).json({ error: error.message });
-  }
-
-});
+);
 
 router.post('/',
   body('name').isObject(),
@@ -73,7 +75,9 @@ router.post('/',
   body('greeting').optional().isString(),
   body('favoriteFruit').optional().isString(),
   async (req, res, next) => {
+    const data = matchedData(req, { locations: ['body'], includeOptionals: true });
     const errors = validationResult(req);
+    
     if (!errors.isEmpty()) {
       res.json(errors);
       return;
@@ -85,7 +89,7 @@ router.post('/',
       const db = client.db(config.mongo.dbName);
       const personsCollection = db.collection(config.mongo.collection.persons);
 
-      let result = await personsCollection.insertOne(req.body);
+      let result = await personsCollection.insertOne(data);
       res.json({ result: result });
 
     } catch (error) {
@@ -96,24 +100,26 @@ router.post('/',
   }
 );
 
-router.delete('/:id', async (req, res, next) => {
-  const client = new MongoClient(config.mongo.uri);
-  
-  try {
-    await client.connect();
-    const db = client.db(config.mongo.dbName);
-    const personsCollection = db.collection(config.mongo.collection.persons);
+router.delete('/:id',
+  param('id').isString().isLength({ min: 24, max: 24 }),
+  async (req, res, next) => {
+    const client = new MongoClient(config.mongo.uri);
+    
+    try {
+      await client.connect();
+      const db = client.db(config.mongo.dbName);
+      const personsCollection = db.collection(config.mongo.collection.persons);
 
-    let result = await personsCollection.deleteOne({ _id: mongo.ObjectId(req.params.id) });
-    res.json({ result: result });
+      let result = await personsCollection.deleteOne({ _id: mongo.ObjectId(req.params.id) });
+      res.json({ result: result });
 
-  } catch (error) {
-    console.log(error);
-    await client.close();
-    res.status(500).json({ error: error.message });
+    } catch (error) {
+      console.log(error);
+      await client.close();
+      res.status(500).json({ error: error.message });
+    }
   }
-
-});
+);
 
 router.put('/:id',
   body('name').isObject(),
@@ -139,8 +145,10 @@ router.put('/:id',
   body('friends.*.name').isString(),
   body('greeting').optional().isString(),
   body('favoriteFruit').optional().isString(),
+  param('id').isString().isLength({ min: 24, max: 24 }),
   async (req, res, next) => {
     const errors = validationResult(req);
+    const data = matchedData(req, { locations: ['body'], includeOptionals: true });
     if (!errors.isEmpty()) {
       res.json(errors);
       return;
@@ -152,7 +160,7 @@ router.put('/:id',
       const db = client.db(config.mongo.dbName);
       const personsCollection = db.collection(config.mongo.collection.persons);
 
-      let result = await personsCollection.updateOne({ _id: mongo.ObjectId(req.params.id) }, { $set: req.body });
+      let result = await personsCollection.updateOne({ _id: mongo.ObjectId(req.params.id) }, { $set: data });
       res.json({ result: result });
 
     } catch (error) {
